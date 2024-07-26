@@ -14,7 +14,7 @@ class RfidInsertRequest extends ApiRequest
         return [
             'reader_name' => 'string',
             'event_type' => 'required|string',
-            'event_data' => ['required',
+            'event_data' => [
                 function ($attribute, $value, $fail) {
                     if ($this->input('event_type') === 'tag_read' && !is_array($value)) {
                         $fail("The $attribute must be an array when event_type is tag_read.");
