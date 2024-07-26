@@ -35,10 +35,10 @@ class RfidApiController extends Controller
             $messages = $this->rfidHeartbeatRepository->insertHeartBeat($input);
         }
 
-	if ($request->get('event_type') == 'time_sync_req') {
-	    $messages['command_type'] = 'sync_time';
-	    $messages['command_data'] = Carbon::now()->timestamp * 1000;
-	}
+        if ($request->get('event_type') == 'sync_time_req') {
+            $messages['command_type'] = 'sync_time';
+            $messages['command_data'] = time() * 1000;
+        }
 
         if (isset($messages['error'])) {
             $messages['code'] = 422;
@@ -48,11 +48,16 @@ class RfidApiController extends Controller
                 'error_message' => json_encode($messages)
             ]);
         } else {
-            $messages['code'] = 200;
-            $messages['status'] = 'success';
+                if($request->get('event_type') == 'time_sync_req'){
+                }
+                else{
+                    $messages['code'] = 200;
+                    $messages['status'] = 'success';
+                }
         }
 
         return response($messages, $messages['code']);
     }
+
 
 }
