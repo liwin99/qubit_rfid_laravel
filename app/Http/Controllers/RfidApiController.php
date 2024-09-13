@@ -48,7 +48,7 @@ class RfidApiController extends Controller
                 'error_message' => json_encode($messages)
             ]);
         } else {
-                if($request->get('event_type') == 'time_sync_req'){
+                if($request->get('event_type') == 'sync_time_req'){
                 }
                 else{
                     $messages['code'] = 200;
@@ -56,7 +56,7 @@ class RfidApiController extends Controller
                 }
         }
 
-        return response($messages, $messages['code']);
+        return response($messages);
     }
 
 
