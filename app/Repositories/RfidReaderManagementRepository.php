@@ -8,6 +8,24 @@ use Illuminate\Support\Facades\DB;
 
 class RfidReaderManagementRepository
 {
+    public function filter($filters)
+    {
+        $query = RfidReaderManagement::query()
+            ->select(DB::raw('rfid_reader_managements.*, master_projects.name as project_name'))
+            ->leftJoin('master_projects', 'master_projects.id', '=', 'rfid_reader_managements.project_id');
+
+            $query->with(['heartbeats' => function ($query) {
+                $query->select('reader_name', DB::raw('MAX(heartbeat_datetime) as max_heartbeat_datetime'))
+                    ->groupBy('reader_name');
+            }]);
+            
+        if (isset($filters['project'])) {
+            $query->where('master_projects.name', 'LIKE', "%{$filters['project']}%");
+        }
+
+        return $query->get();
+    }
+
     public function getRfidReaderManagements($filter = [], $asList = true, $pagination = false)
     {
         $query = RfidReaderManagement::query()
