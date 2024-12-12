@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RfidReaderManagement\StoreRfidReaderManagementRequest;
 use App\Http\Requests\RfidReaderManagement\UpdateRfidReaderManagementRequest;
+use App\Http\Requests\RfidGetReaderRequest;
 use App\Models\RfidReaderManagement;
 use App\Repositories\RfidReaderManagementRepository;
 use App\Repositories\RfidReaderPairingRepository;
@@ -13,6 +14,19 @@ class RfidReaderManagementController extends Controller
 {
     private RfidReaderManagementRepository $rfidReaderManagementRepository;
     private RfidReaderPairingRepository $rfidReaderPairingRepository;
+
+    public function getReader(RfidGetReaderRequest $request){
+        $filters = $request->all();
+        try{
+            $rfid_reader_managements = $this->rfidReaderManagementRepository->filter($filters);
+            foreach($rfid_reader_managements as $rfid_reader_management){
+                $rfid_reader_management['isOnline'] = $rfid_reader_management->isOnline($rfid_reader_management['heartbeats']);
+            }
+            return response()->json($rfid_reader_managements);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode());
+        }
+    }
 
     public function __construct(
         RfidReaderManagementRepository $rfidReaderManagementRepository,

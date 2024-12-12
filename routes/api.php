@@ -29,3 +29,4 @@ Route::get('/rfid-heartbeat/', 'App\Http\Controllers\RfidHeartbeatController@fil
 Route::post('/rfid/insert', 'App\Http\Controllers\RfidApiController@insert');
 
 Route::get('/rfid/filter', 'App\Http\Controllers\RfidTagReadController@filterTms');
+Route::get('/rfid/reader', 'App\Http\Controllers\RfidReaderManagementController@getReader');
