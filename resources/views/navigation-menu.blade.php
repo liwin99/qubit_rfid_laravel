@@ -18,9 +18,6 @@
                     <x-nav-link href="{{ route('rfid.management.index') }}" :active="request()->routeIs('rfid.management.index')">
                         {{ __('RFID Reader Management') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('rfid.status.index') }}" :active="request()->routeIs('rfid.status.index')">
-                        {{ __('RFID Reader Status') }}
-                    </x-nav-link>
                     <x-nav-link href="{{ route('rfid.pairing.index') }}" :active="request()->routeIs('rfid.pairing.index')">
                         {{ __('RFID Reader Pairing') }}
                     </x-nav-link>
@@ -176,9 +173,6 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('rfid.management.index') }}" :active="request()->routeIs('rfid.management.index')">
                 {{ __('RFID Reader Management') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('rfid.status.index') }}" :active="request()->routeIs('rfid.status.index')">
-                {{ __('RFID Reader Status') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('rfid.pairing.index') }}" :active="request()->routeIs('rfid.pairing.index')">
                 {{ __('RFID Reader Pairing') }}

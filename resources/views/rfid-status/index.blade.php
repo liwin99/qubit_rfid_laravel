@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('RFID Reader Status') }}
+            {{ __('Dashboard') }}
         </h2>
         <div class="my-6" x-data="{ open: false }">
             <div class="inline-flex justify-center gap-10 cursor-pointer border bg-gray-50 rounded-sm p-1 px-2" @click="open = ! open">

@@ -25,7 +25,7 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [RfidReaderStatusController::class, 'index'])->name('dashboard');
 
     Route::prefix('master-project')->group(function () {
         Route::get('/', [MasterProjectController::class, 'index'])->name('master.project.index');
