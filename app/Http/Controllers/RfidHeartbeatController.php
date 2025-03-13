@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RfidHeartbeatilterRequest;
+use App\Http\Requests\RfidHeartbeatFilterRequest;
 use App\Repositories\RfidHeartbeatRepository;
 
 class RfidHeartbeatController extends Controller
@@ -16,7 +16,7 @@ class RfidHeartbeatController extends Controller
         $this->rfidHeartbeatRepository = $rfidHeartbeatRepository;
     }
 
-    public function filter(RfidHeartbeatilterRequest $request)
+    public function filter(RfidHeartbeatFilterRequest $request)
     {
         $filters = $request->all();
 
