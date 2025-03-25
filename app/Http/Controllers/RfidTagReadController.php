@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RfidTagReadFilterRequest;
 use App\Repositories\RfidTagReadRepository;
+use App\Http\Requests\GetTagReadLogsFromQTimeRequest;
+use Illuminate\Support\Facades\Log;
 
 class RfidTagReadController extends Controller
 {
@@ -66,5 +68,24 @@ class RfidTagReadController extends Controller
             $verb = count($disallowed_field) == 1 ? 'is' : 'are';
             throw new \Exception(implode(', ', $disallowed_field) . " {$verb} not allowed.", 422);
         }
+    }
+
+    public function getTagReadLogsFromQTime(GetTagReadLogsFromQTimeRequest $request)
+    {
+        $filters = $request->all();
+
+        try {
+            $rfid_tag_reads = $this->rfidTagReadRepository->getTagReadLogsFromQTime($filters);
+
+            return response()->json($rfid_tag_reads);
+        } catch (\Throwable $e) {
+            Log::error('Error in getTagReadLogsFromQTime: ' . $e->getMessage(), [
+                'exception' => $e,
+                'filters' => $filters
+            ]);
+
+            return response()->json(['error' => $e->getMessage()], $e->getCode());
+        }
+
     }
 }

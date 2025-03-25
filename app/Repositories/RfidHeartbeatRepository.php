@@ -11,19 +11,10 @@ class RfidHeartbeatRepository
     public function filter($filters)
     {
         $query = RfidHeartbeat::query();
-
-        if (isset($filters['reader_name'])) {
-            $query->where('reader_name', $filters['reader_name']);
-        }
-
-        if (isset($filters['heartbeat_datetime_from'])) {
-            $query->where('heartbeat_datetime', '>=', $filters['heartbeat_datetime_from']);
-        }
-
-        if (isset($filters['heartbeat_datetime_to'])) {
-            $query->where('heartbeat_datetime', '<=', $filters['heartbeat_datetime_to']);
-        }
-
+        $query->where('reader_name', $filters['reader_name']);
+        $query->where('heartbeat_datetime', '>=', $filters['heartbeat_datetime_from']);
+        $query->where('heartbeat_datetime', '<=', $filters['heartbeat_datetime_to']);
+        
         return $query->get();
     }
 

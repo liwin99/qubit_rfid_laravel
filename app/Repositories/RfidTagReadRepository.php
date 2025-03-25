@@ -210,8 +210,55 @@ class RfidTagReadRepository
         return $messages;
     }
 
-    public function insertInboundLog($data)
+    public function getTagReadLogsFromQTime($filters)
     {
+        $query = RfidTagRead::leftJoin('rfid_reader_managements', 'rfid_tag_reads.reader_name', '=', 'rfid_reader_managements.name')
+	    ->select('rfid_tag_reads.id',
+                 'rfid_tag_reads.reader_name',
+                 'rfid_tag_reads.epc',
+                 'rfid_tag_reads.tag_read_datetime',
+                 'rfid_tag_reads.created_at',
+            DB::raw('IFNULL((SELECT NAME FROM master_projects WHERE rfid_reader_managements.project_id=master_projects.id),null) AS project_code'),
+            DB::raw('IFNULL((SELECT NAME FROM master_locations WHERE rfid_reader_managements.location_1_id=master_locations.id),null) AS location_1'),
+            DB::raw('IFNULL((SELECT NAME FROM master_locations WHERE rfid_reader_managements.location_2_id=master_locations.id),null) AS location_2'),
+            DB::raw('IFNULL((SELECT NAME FROM master_locations WHERE rfid_reader_managements.location_3_id=master_locations.id),null) AS location_3'),
+            DB::raw('IFNULL((SELECT NAME FROM master_locations WHERE rfid_reader_managements.location_4_id=master_locations.id),null) AS location_4'),
+        );
 
+        $query->whereIn('rfid_tag_reads.epc', $filters['rfid_tag_code']);
+
+        if (!empty($filters['fromDateTime'])) {
+            $filters['fromDateTime'] = Carbon::parse($filters['fromDateTime'])->utc()->format('Y-m-d H:i:s');
+        }
+        
+        if (!empty($filters['toDateTime'])) {
+            $filters['toDateTime'] = Carbon::parse($filters['toDateTime'])->utc()->format('Y-m-d H:i:s');
+        }
+    
+        // Filter for a specific Period
+        if (!empty($filters['fromDateTime']) && !empty($filters['toDateTime'])) {
+            $query->whereBetween('rfid_tag_reads.tag_read_datetime', [$filters['fromDateTime'], $filters['toDateTime']]);
+        } elseif (!empty($filters['fromDateTime'])) {
+            $query->where('rfid_tag_reads.tag_read_datetime', '>=', $filters['fromDateTime']);
+        } elseif (!empty($filters['toDateTime'])) {
+            $query->where('rfid_tag_reads.tag_read_datetime', '<=', $filters['toDateTime']);
+        }   
+    
+        // Search functionality
+        if (!empty($filters['keyword'])) {
+            $search = $filters['keyword'];
+            $query->where(function ($q) use ($search) {
+                $q->where('rfid_tag_reads.epc', 'LIKE', "%{$search}%");
+            });
+        }
+    
+        // Sorting functionality
+        if (!empty($filters['sortBy'])) {
+            $direction = $filters['sortOrder'] ?? 'asc';
+            $query->orderBy($filters['sortBy'], $direction);
+        }
+    
+        // Pagination (default: 10 per page)
+        return $query->paginate($filters['limit'] ?? 10);
     }
 }

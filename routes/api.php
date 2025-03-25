@@ -26,6 +26,7 @@ Route::middleware('client')->group(function() {
 Route::get('/rfid-tag-read/filter', 'App\Http\Controllers\RfidTagReadController@filter')->middleware('auth:api');
 Route::get('/rfid-heartbeat/', 'App\Http\Controllers\RfidHeartbeatController@filter')->middleware('auth:api');
 
+Route::get('/rfid/rfid-tag-read-logs/', 'App\Http\Controllers\RfidTagReadController@getTagReadLogsFromQTime')->middleware('auth:api');
 Route::post('/rfid/insert', 'App\Http\Controllers\RfidApiController@insert');
 
 Route::get('/rfid/filter', 'App\Http\Controllers\RfidTagReadController@filterTms');
