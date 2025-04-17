@@ -294,7 +294,13 @@ class WorkerTimeLogService
             $summarizedWorkerTimeLog->where('period', $date);
         }
 
-        $staffs = DB::connection('tms_mysql')->table('staff')->get(['code', 'name', 'location', 'incharge', 'rfid']);
+        $staffs = DB::connection('tms_mysql')->table('staff')
+        ->leftJoin('device_project','device_project.project','=','staff.location')
+        ->where('device_project.device', $project->name)
+        ->where('device_project.platform', 'RFID')
+        ->get(['staff.code', 'staff.name', 'staff.location', 'staff.incharge', 'staff.rfid']);
+
+
 
         $staffMapping = $staffs->keyBy('rfid')->toArray();
 
