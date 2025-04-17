@@ -306,16 +306,7 @@ class WorkerTimeLogService
 
                 $timeLog['staffcode'] = $staffInfo->code;
                 $timeLog['staffname'] = $staffInfo->name;
-
-                $attendance = DB::connection('tms_mysql')
-                ->table('rosterdetail')
-                ->where('staffcode', $staffInfo->code)
-                ->where('cdate', $timeLog->cdate)
-                ->select('dept');
-
-                $attendance = $attendance->first();
-                
-                $timeLog['dept'] = $attendance->dept;
+                $timeLog['dept'] = $staffInfo->location;
                 $timeLog['incharge'] = $staffInfo->incharge;
             }
 
