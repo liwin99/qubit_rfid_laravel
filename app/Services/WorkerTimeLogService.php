@@ -300,7 +300,9 @@ class WorkerTimeLogService
         ->where('device_project.platform', 'RFID')
         ->get(['staff.code', 'staff.name', 'staff.location', 'staff.incharge', 'staff.rfid']);
 
-
+        if($staffs->isEmpty()){
+            $staffs = DB::connection('tms_mysql')->table('staff')->get(['code', 'name', 'location', 'incharge', 'rfid']);
+        }
 
         $staffMapping = $staffs->keyBy('rfid')->toArray();
 
