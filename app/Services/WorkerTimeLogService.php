@@ -288,44 +288,49 @@ class WorkerTimeLogService
             ->leftJoin('master_locations as r1location3', 'r1location3.id', '=', 'r1_rfid_reader_managements.location_3_id')
             ->leftJoin('master_locations as r1location4', 'r1location4.id', '=', 'r1_rfid_reader_managements.location_4_id')
             ->where('worker_time_logs.project_id', $project->id);
-
+    
         if (isset($date)) {
             $date = Carbon::parse($date)->toDateString();
-            $summarizedWorkerTimeLog->where('period', $date);
+            $summarizedWorkerTimeLog = $summarizedWorkerTimeLog->where('period', $date)->get(); // change dynamic builder to static object
         }
-
+    
         $staffs = DB::connection('tms_mysql')->table('staff')
         ->leftJoin('device_project','device_project.project','=','staff.location')
         ->where('device_project.device', $project->name)
         ->where('device_project.platform', 'RFID')
         ->get(['staff.code', 'staff.name', 'staff.location', 'staff.incharge', 'staff.rfid']);
-
+    
         if($staffs->isEmpty()){
             $staffs = DB::connection('tms_mysql')->table('staff')->get(['code', 'name', 'location', 'incharge', 'rfid']);
         }
-
-        $staffMapping = $staffs->keyBy('rfid')->toArray();
-
-        $summarizedWorkerTimeLog = $summarizedWorkerTimeLog->get()->map(function ($timeLog) use ($staffMapping) {
-            $rfid = $timeLog['rfid_tag_code'];
-
-            if (isset($staffMapping[$rfid])) {
-                $staffInfo = $staffMapping[$rfid];
-
-                $timeLog['staffcode'] = $staffInfo->code;
-                $timeLog['staffname'] = $staffInfo->name;
-                $timeLog['dept'] = $staffInfo->location;
-                $timeLog['incharge'] = $staffInfo->incharge;
-            }
-
-            // convert clock in and clock out time to GMT+8
-            $timeLog['cin'] = isset($timeLog['cin']) ? Carbon::parse($timeLog['cin'])->timezone('GMT+8') : null;
-            $timeLog['cout'] = isset($timeLog['cout']) ? Carbon::parse($timeLog['cout'])->timezone('GMT+8') : null;
-            $timeLog['updatedtime'] = Carbon::parse($timeLog['updatedtime'])->timezone('GMT+8');
-
-            return $timeLog;
+    
+        $staffs = $staffs->map(function($staff) use ($summarizedWorkerTimeLog){ // left join from staff to timelog
+            $staff->timeLog = $summarizedWorkerTimeLog->filter(function($timeLog) use ($staff) {
+                return $timeLog->rfid_tag_code === $staff->rfid;
+            })->values();
+            return $staff;
         });
-
+        $staffs = $staffs->filter(function ($staff) {   // filter staff with timelog
+            return isset($staff->timeLog) && count($staff->timeLog) > 0;
+        })->values();
+        $summarizedWorkerTimeLog = [];
+        foreach ($staffs as $staff) {   //populate each timelog with staff info
+            if (isset($staff->timeLog)) {
+                foreach ($staff->timeLog as $value) {
+                    $log = $value->toArray();   // make timelog field accessible first
+                    $log['id'] = null;
+                    $log['staffcode'] = $staff->code;
+                    $log['staffname'] = $staff->name;
+                    $log['dept'] = $staff->location;
+                    $log['incharge'] = $staff->incharge;
+                    $log['cin'] = isset($log['cin']) ? Carbon::parse($log['cin'])->timezone('GMT+8') : null;
+                    $log['cout'] = isset($log['cout']) ? Carbon::parse($log['cout'])->timezone('GMT+8') : null;
+                    $log['updatedtime'] = Carbon::parse($log['updatedtime'])->timezone('GMT+8');
+                    $summarizedWorkerTimeLog[] = $log;
+                }
+            }
+        }
+        $summarizedWorkerTimeLog = WorkerTimeLog::hydrate($summarizedWorkerTimeLog); // revert timelog to model
         $summarizedWorkerTimeLog = $summarizedWorkerTimeLog->filter(function ($timeLog) {
              return isset($timeLog['staffcode']) && isset($timeLog['staffname']);
         });
@@ -341,6 +346,7 @@ class WorkerTimeLogService
                 DB::connection('tms_mysql')->table('rosterdetail_rfid')->updateOrInsert(
                     [
                         'cdate' => $timeLog->cdate,
+                        'staffcode' => $timeLog->staffcode, //insert depend on staffcode as well
                         'rfid_tag_code' => $timeLog->rfid_tag_code,
                     ],
                     $timeLog->toArray()
