@@ -21,6 +21,7 @@ class RfidReaderManagementController extends Controller
             $rfid_reader_managements = $this->rfidReaderManagementRepository->filter($filters);
             foreach($rfid_reader_managements as $rfid_reader_management){
                 $rfid_reader_management['isOnline'] = $rfid_reader_management->isOnline($rfid_reader_management['heartbeats']);
+                $rfid_reader_management['fullName'] = $rfid_reader_management->fullName;
             }
             return response()->json($rfid_reader_managements);
         } catch (\Throwable $e) {
