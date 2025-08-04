@@ -85,7 +85,7 @@ class WorkerTimeLogService
 
             // logic to determine deduct day or not when it's before 8am
             // first convert to MYT, then check if day is +1, if yes, deduct day and then convert to UTC again
-            if ($startingPeriodMyt->isAfter($startingPeriod)) {
+            if ($startingPeriodMyt->format('Y-m-d H:i:s')>($startingPeriod->format('Y-m-d H:i:s'))) {
                 $startingPeriodMyt->subDay();
                 $startingPeriod = $startingPeriodMyt->timezone('UTC');
                 $endingPeriodMyt->subDay();
